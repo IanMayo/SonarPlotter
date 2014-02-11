@@ -1,0 +1,78 @@
+<html>
+<head>
+	<style type="text/css">
+		#container {
+			width:500px;
+			height:600px;
+		}
+	</style>
+  <script type="text/javascript" src="js/dygraphs-master/dygraph-dev.js"></script>
+  <script type="text/javascript" src="js/FastBlur.js"></script>
+
+</head>
+<body>
+
+	<div id="container"></div>
+
+	<script type="text/javascript">
+
+      // generate test data
+      var data = []; // data array
+      var t = new Date();
+      for (var i = 0; i <= 100; i++) {
+        var y = new Date(t.getTime() + i * 3000);
+        data.push([120+Math.random()*100, y]); // add x,y values to data array
+        //console.log('x:',100+Math.random()*100,' y:',y);
+      }
+
+      // new dygraph to div container
+      var g = new Dygraph(document.getElementById("container"), data,
+                          { // set options
+                            interactionModel : {
+
+                              'dblclick' : dblClickVS,//back to initial from zoom
+                              'mousewheel' : scrollVS //zoom
+
+                            },
+                            drawPoints: false,
+                            showRoller: false,
+                            dateWindow: [0,360], // set x boundaries
+                            //labels: ['Random', 'Time'],
+                            axes: { // adjust axes
+                              x: {
+                                
+                              },
+                              y: {
+                                 
+                                //pixelsPerLabel: 50,
+                                axisLabelFormatter: function(y) {
+                                  // convert y labels, which are dates, to our time format:
+                                  var dat = new Date(y);
+                                  var h = dat.getHours() < 10 ? '0' + dat.getHours() : dat.getHours();
+                                  var m = dat.getMinutes() < 10 ? '0' + dat.getMinutes() : dat.getMinutes();
+                                  var s = dat.getSeconds() < 10 ? '0' + dat.getSeconds() : dat.getSeconds();
+                                  
+                                  return h+':'+m+':'+s;
+                                }
+                              }
+                            }
+                          });
+
+      
+      // Rewraw dygraph every 3 seconds with new values
+      window.intervalId = setInterval(function() {
+
+        var n = new Date();  // current time
+        var y = new Date(n.getTime() + 100 * 3000); // time of new detections falling from the top
+        var x = 120+Math.random()*100; // random x value for testing purposes
+        data.push([x, y]);  // add new data to data array
+        //console.log('x:',x,' y:',y);
+        data.splice(0, 1); // remove first element of data array
+        g.updateOptions( { 'file': data, valueRange : [g.yAxisRange()[0]+3000,g.yAxisRange()[1]+3000]} ); // redraw dygraph with new data
+
+      }, 3000);
+
+
+	</script>
+</body>
+</html>
