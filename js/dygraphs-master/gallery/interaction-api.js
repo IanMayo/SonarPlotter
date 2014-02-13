@@ -112,7 +112,7 @@ function scrollV3(event, g, context) {
 
 function scrollVS(event, g, context) {
 
-  if (g.xAxisRange()[1] <= 360) {
+  if (g.yAxisRange()[1] <= 360) {
     var normal = event.detail ? event.detail * -1 : event.wheelDelta / 40;
     // For me the normalized value shows 0.075 for one click. If I took
     // that verbatim, it would be a 7.5%.
@@ -130,10 +130,10 @@ function scrollVS(event, g, context) {
     //zoom(g, percentage, xPct, yPct); LLL
     zoom(g, percentage, 0, 0);
 
-    if (g.xAxisRange()[1] > 360) {
+    if (g.yAxisRange()[1] > 360) {
       g.updateOptions({
-      dateWindow: [0,360],
-      valueRange: null
+      valueRange: [0,360],
+      dateWindow: null
     });
     }
   }
@@ -235,8 +235,8 @@ function dblClickV4(event, g, context) {
 function dblClickVS(event, g, context) {
 
   g.updateOptions({
-    dateWindow: [0,360],
-    valueRange: null
+    valueRange: [0,360],
+    dateWindow: null
   });
 
 }

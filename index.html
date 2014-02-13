@@ -1,13 +1,33 @@
 <html>
 <head>
 	<style type="text/css">
-		#container {
-			width:500px;
-			height:600px;
-		}
+
+    /* fix axis labels */
+    #container .dygraph-axis-label-y {
+      text-align: center;
+    }
+    #container .dygraph-axis-label-x {
+      text-align: right;
+    }
+    /* rotate legend */
+    #container .dygraph-legend {
+      transform: rotate(-90deg) rotateX(180deg) translateX(0.5px) translateY(0.5px);
+      -ms-transform: rotate(-90deg) rotateX(180deg) translateX(0.5px) translateY(0.5px);
+      -webkit-transform: rotate(-90deg) rotateX(180deg) translateX(0.5px) translateY(0.5px);
+    }
+    /* dygraphs parent div */
+    #container {
+      margin-left: 65px;
+      width: 500px;
+      height: 600px;
+      /*background: lightgrey;*/
+    }
+    /* position fix */
+     #container canvas {bottom:20px;}
+
 	</style>
+
   <script type="text/javascript" src="js/dygraphs-master/dygraph-dev.js"></script>
-  <script type="text/javascript" src="js/FastBlur.js"></script>
 
 </head>
 <body>
@@ -16,34 +36,138 @@
 
 	<script type="text/javascript">
 
+    // Rotation code based on Ransom Christofferson jquery example 
+    var dy_w = 600; // Use in dygraph options: width: dy_w,
+    var dy_h = 460; // Use in dygraph options: height: dy_h,
+    var dy_id = '#container';
+    var did = document.getElementById('container');
+
+    // Switch mouse X and Y values to properly interact with 90-rotated dygraph
+    // Then use dygraph option:
+    //interactionModel: {
+    //    mousedown:  newInteraction,
+    //    mouseup:  newInteraction,
+    //    mousemove:  newInteraction,
+    //    mouseout: newInteraction,
+    //    dblclick: newInteraction
+    //  }
+    var newInteraction = function( c, b, a ) {
+      // 'c' is the MouseEvent
+      
+      // Make a new MouseEvent
+      var new_c;
+      if (document.createEvent) new_c = document.createEvent('MouseEvent');
+      else if (document.createEventObject) new_c = document.createEventObject();
+      
+      // Switch the X and Y values
+      var new_x = did.offsetWidth + did.offsetLeft - (c.pageY - did.offsetTop) - document.body.scrollLeft;
+      var new_y = did.offsetHeight + did.offsetTop - (c.pageX - did.offsetLeft) - document.body.scrollTop;
+
+      // Dygraphs doesn't make use of screenX and screenY, so we can ignore those
+      new_c.initMouseEvent( c.type, c.bubbles, c.cancelable, c.view, c.detail, c.screenX, c.screenY, new_x, new_y, c.ctrlKey, c.altKey, c.shiftKey, c.metaKey, c.button, c.target );
+      
+      // call the original function, but with the new altered MouseEvent
+     Dygraph.Interaction.defaultModel[c.type]( new_c, b, a );
+    }
+    
+    // Rotate all the labels
+    var restyle = function() {
+      //Add option 'drawCallback: restyle' to dygraph
+
+      //var xlabel_transform = 'rotate(180deg) translateY(-5px) rotateY(180deg)';
+      //var xlab = document.getElementsByClassName('dygraph-xlabel');
+      //for (var i = 0; xlab[i] != null; i++) {
+      //  xlab[i].parentNode.style.transform = xlabel_transform;
+      //  xlab[i].parentNode.style.msTransform = xlabel_transform;
+      //  xlab[i].parentNode.style.webkitTransform = xlabel_transform;
+      //}
+
+      //var ylabel_transform = 'rotate(90deg) rotateY(180deg) translateY(-10px)';
+      //var ylab = document.getElementsByClassName('dygraph-ylabel');
+      //for (var i = 0; ylab[i] != null; i++) {
+      //  ylab[i].parentNode.style.transform = ylabel_transform;
+      //  ylab[i].parentNode.style.msTransform = ylabel_transform;
+      //  ylab[i].parentNode.style.webkitTransform = ylabel_transform;
+      //}
+      
+      var axis_label_x_transform = 'translateY(17.5px) translateX(0.5px) rotate(90deg) rotateY(180deg)';
+      var ax_lx = document.getElementsByClassName('dygraph-axis-label-x');
+      for (var i = 0; ax_lx[i] != null; i++) {
+        ax_lx[i].parentNode.style.transform = axis_label_x_transform;
+        ax_lx[i].parentNode.style.msTransform = axis_label_x_transform;
+        ax_lx[i].parentNode.style.webkitTransform = axis_label_x_transform;
+      }
+      
+      var axis_label_y_transform = 'translateX(17.5px) translateY(0.5px) rotate(90deg) rotateY(180deg)';
+      var ax_ly = document.getElementsByClassName('dygraph-axis-label-y');
+      for (var i = 0; ax_ly[i] != null; i++) {
+        ax_ly[i].parentNode.style.marginTop = '-20px';
+        ax_ly[i].parentNode.style.transform = axis_label_y_transform;
+        ax_ly[i].parentNode.style.msTransform = axis_label_y_transform;
+        ax_ly[i].parentNode.style.webkitTransform = axis_label_y_transform;
+      }
+      
+      var leg = document.getElementsByClassName('dygraph-legend');
+      leg[0].style.textAlign = 'right';
+      leg[0].style.top = '85px';
+      leg[0].style.left = (dy_w - 150) + 'px';
+      leg[0].style.background = 'white';
+  
+    }
+    
+    // rotate dygraph div
+    var dy_tr = 'rotate(-90deg) rotateX(180deg) translateX(' + (dy_h - dy_w)/2 + 'px) translateY(' + (dy_w - dy_h)/2 + 'px)';
+    did.style.transform = dy_tr;
+    did.style.msTransform = dy_tr;
+    did.style.webkitTransform = dy_tr;
+
+
       // generate test data
       var data = []; // data array
       var t = new Date();
-      for (var i = 0; i <= 100; i++) {
-        var y = new Date(t.getTime() + i * 3000);
-        data.push([120+Math.random()*100, y]); // add x,y values to data array
-        //console.log('x:',100+Math.random()*100,' y:',y);
+      for (var i = 0; i <= 1000; i++) {
+        var x = new Date(t.getTime() + i * 3000);
+        data.push([x, 130+Math.random()*10, 170+Math.random()*10, 100+Math.random()*10, 50+Math.random()*10, 210+Math.random()*10, 250+Math.random()*10, 290+Math.random()*10]); // add x,y,.. values to data array
+        //console.log('x:',x,' y:',100+Math.random()*100);
+      }
+
+      function addDetector(time, seriesName, bearing, strength){
+
       }
 
       // new dygraph to div container
       var g = new Dygraph(document.getElementById("container"), data,
                           { // set options
+                            width: dy_w,
+                            height: dy_h,
+                            drawCallback: restyle,
+
                             interactionModel : {
+                              //mousedown:  newInteraction, // don't used currently
+                              //mouseup:  newInteraction,
+                              //mousemove:  newInteraction,
+                              //mouseout: newInteraction,
+                              
+                              //'mousedown' : downV3, // for panning
+                              //'mousemove' : moveV3, // 
+                              //'mouseup' : upV3,     // 
+                              //'click' : clickV3,
 
                               'dblclick' : dblClickVS,//back to initial from zoom
                               'mousewheel' : scrollVS //zoom
-
                             },
+
                             drawPoints: false,
                             showRoller: false,
-                            dateWindow: [0,360], // set x boundaries
+                            //dateWindow: [0,360], // set x boundaries
+                            valueRange: [0,360],
                             //labels: ['Random', 'Time'],
                             axes: { // adjust axes
-                              x: {
+                              y: {
                                 
                               },
-                              y: {
-                                 
+                              x: {
+                                
                                 //pixelsPerLabel: 50,
                                 axisLabelFormatter: function(y) {
                                   // convert y labels, which are dates, to our time format:
@@ -58,17 +182,52 @@
                             }
                           });
 
+
+      // Alter another mousemove function since we've rotated this graph 90 degrees
+      g.mousemove_func = g.mouseMove_;
+      g.mouseMove_ = function(b) {
+        // "b" is the MouseEvent object
+
+        var new_b = cloneEventObj(b);
+
+        // switch the x and y values for this mouse event... well, dygraphs only cares about the mouse X value in this case.
+        new_b.pageX = did.offsetWidth + did.offsetLeft - (b.pageY - did.offsetTop) - document.body.scrollLeft;
+
+        // call the original function, using the new MouseEvent
+        g.mousemove_func(new_b);
+      }
+
+      // Clone js event by creating and filling prototype of it
+      function cloneEventObj(eventObj, overrideObj){
+        if(!overrideObj){ overrideObj = {}; }
+        function EventCloneFactory(overProps){
+          for(var x in overProps){
+            this[x] = overProps[x];
+          }
+        }
+        EventCloneFactory.prototype = eventObj;
+        return new EventCloneFactory(overrideObj)
+      }  
       
       // Rewraw dygraph every 3 seconds with new values
       window.intervalId = setInterval(function() {
+        //var vr = g.yAxisRange();
+        //var rx = g.xAxisRange;
 
+        
         var n = new Date();  // current time
-        var y = new Date(n.getTime() + 100 * 3000); // time of new detections falling from the top
-        var x = 120+Math.random()*100; // random x value for testing purposes
-        data.push([x, y]);  // add new data to data array
+        var x = new Date(n.getTime() + 1000 * 3000); // time of new detections falling from the top
+
+        // Add new data to data array
+        data.push([x, 130+Math.random()*10, 170+Math.random()*10, 100+Math.random()*10, 50+Math.random()*10, 210+Math.random()*10, 250+Math.random()*10, 290+Math.random()*10]);  
+        
         //console.log('x:',x,' y:',y);
-        data.splice(0, 1); // remove first element of data array
-        g.updateOptions( { 'file': data, valueRange : [g.yAxisRange()[0]+3000,g.yAxisRange()[1]+3000]} ); // redraw dygraph with new data
+
+        // Remove first element of data array
+        data.splice(0, 1); 
+
+        // Redraw dygraph with new data
+        g.updateOptions( { 'file': data, dateWindow : [g.xAxisRange()[0]+3000,g.xAxisRange()[1]+3000]} ); 
 
       }, 3000);
 

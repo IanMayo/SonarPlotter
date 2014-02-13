@@ -201,6 +201,7 @@ axes.prototype.willDrawChart = function(e) {
         }
         if (tick[0] === 0) {
           label.style.left = (area.x - g.getOption('yAxisLabelWidth') - g.getOption('axisTickSize')) + "px";
+          //label.style.left = canvasWidth + (area.x - g.getOption('yAxisLabelWidth') - g.getOption('axisTickSize')) + "px";//LLL
           label.style.textAlign = "right";
         } else if (tick[0] == 1) {
           label.style.left = (area.x + area.w +
@@ -273,8 +274,8 @@ axes.prototype.willDrawChart = function(e) {
 
         label = makeDiv(tick[1], 'x');
         label.style.textAlign = "center";
-        //label.style.top = (y + g.getOption('axisTickSize')) + 'px'; LLL
-        label.style.top = (g.getOption('axisTickSize')) - g.getOptionForAxis('axisLabelFontSize', 'x') - 5 + 'px';
+        label.style.top = (y - 20 + g.getOption('axisTickSize')) + 'px';// LLL
+        //label.style.top = (g.getOption('axisTickSize')) - g.getOptionForAxis('axisLabelFontSize', 'x') - 5 + 'px';
 
         var left = (x - g.getOption('axisLabelWidth')/2);
         if (left + g.getOption('axisLabelWidth') > canvasWidth) {
