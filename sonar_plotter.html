@@ -1,0 +1,130 @@
+<html>
+<head>
+	<style type="text/css">
+		#container {
+			width:500px;
+			height:600px;
+		}
+	</style>
+  <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="js/jquery.flot.js"></script>
+  <script type="text/javascript" src="js/jquery.flot.time.js"></script>
+  <script type="text/javascript" src="js/jquery.flot.navigate.js"></script>
+  <script type="text/javascript" src="js/FastBlur.js"></script>
+
+</head>
+<body>
+
+	<div id="container"></div>
+
+	<script type="text/javascript">
+
+      var data = [];
+      var t = new Date();
+      for (var i = 0; i <= 100; i++) {
+        var y = new Date(t.getTime() + i * 3000);
+
+        data.push([120+Math.random()*100, y]);
+      }
+
+      // set initial top/bottom of plot
+      var to = data[100][1].getTime()+2000;
+      var bo = data[0][1].getTime()-6000;
+
+      var options = {
+  
+        series: {
+          color: '#269246',
+          lines: {
+            show: true,
+            lineWidth: 1.2
+          },
+          points: { show: true }
+        },
+        
+        zoom: {
+          interactive: true
+
+        },
+
+        xaxis: {
+          min: 0,
+          max: 360,
+          //tickSize: 60,
+          position: "top",
+          zoomRange: [100, 360],// need to change to computable values to prevent stretch at zoom end
+          panRange: false
+        
+        },
+        
+        yaxis: {
+          max: to, // transfer initial top/bottom values
+          min: bo,
+          mode: "time",
+          zoomRange: [60000,360000],// need to change to computable values to prevent stretch
+          panRange: false,
+
+          //format labels
+          tickFormatter: function (v, axis) {
+            var dat = new Date(v);
+ 
+            //if (dat.getSeconds() % 20 == 0) {
+                var h = dat.getHours() < 10 ? "0" + dat.getHours() : dat.getHours();
+                var m = dat.getMinutes() < 10 ? "0" + dat.getMinutes() : dat.getMinutes();
+                var s = dat.getSeconds() < 10 ? "0" + dat.getSeconds() : dat.getSeconds();
+ 
+                return h + ":" + m + ":" + s;
+            //} else {
+            //    return "";
+            //}
+          }
+        }
+      };
+
+      // make/draw plot
+      var plot = $("#container").plot([data], options).data("plot");
+
+      window.intervalId = setInterval(function() {
+        var n = new Date();  // current time
+        var y = new Date(n.getTime() + 100 * 3000); // time of new detections falling from the top
+
+        // random test x data
+        var x = 120+Math.random()*100;
+        
+        // add new point
+        data.push([x, y]);
+
+        // remove last point to keep initial number of points
+        data.splice(0, 1);
+
+        //console.log('ydata: ', data[100][1]);
+        
+        // In order to move plot we need to increase it's borders in options
+        plot.getOptions().yaxes[0].max += 3000;
+        plot.getOptions().yaxes[0].min += 3000;
+        plot.setupGrid();
+
+        // get current axes
+        var axes = plot.getAxes();
+        
+        // get current options without zoom modifications
+        var pOptions = plot.getOptions();
+
+        // set zoom modifications picked from the state of current axes
+        pOptions.yaxis.max = axes.yaxis.max;
+        pOptions.yaxis.min = axes.yaxis.min;
+        //console.log(pOptions.yaxis.max);
+        pOptions.xaxis.min = axes.xaxis.min;
+        pOptions.xaxis.max = axes.xaxis.max;
+
+        // draw new cadre, save plot object
+        plot = $.plot($("#container"), [data], pOptions);
+        
+        //$.extend(true, {}, options, {  yaxis: { min: axes.yaxis.min, max: axes.yaxis.max } })
+
+       }, 3000);
+
+
+	</script>
+</body>
+</html>
