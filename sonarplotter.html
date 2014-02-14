@@ -22,9 +22,9 @@
       var data = []; var v= 1354586000000;
       var t = new Date();
       for (var i = 1000; i >= 0; i--) {
-        var dat = new Date(t.getTime() + i * 1000);
+        var dat = new Date(t.getTime() - i * 1000);
         var y = dat.getTime();
-        v += 100000;
+        //v += 100000;
         data.push([100+Math.random()*100, y]);
       }
 

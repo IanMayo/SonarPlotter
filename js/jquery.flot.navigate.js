@@ -125,9 +125,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
     function init(plot) {
         function onZoomClick(e, zoomOut) {
-            var c = plot.offset();
-            c.left = e.pageX - c.left;
-            c.top = e.pageY - c.top;
+            var w = plot.width(),  h = plot.height(); // LLL
+            var c = { left: w / 2, top: h*2 / 3 }; // LLL should look to ship
+            //var c = plot.offset(); 
+            //c.left = e.pageX - c.left;
+            //c.top = e.pageY - c.top;
             if (zoomOut)
                 plot.zoomOut({ center: c });
             else
