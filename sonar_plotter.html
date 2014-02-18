@@ -40,8 +40,8 @@
       }
 
       // set initial top/bottom of plot
-      var to = data[100][1]+2000;
-      var bo = data[0][1]-6000;
+      var to = data[100][1]+500;
+      var bo = data[0][1]-500;
 
       var options = {
         grid: {
@@ -51,7 +51,7 @@
         hooks: { draw: [function(plot, canvascontext) { // Add a hook to fill the space between given series
                           fillseries(plot, canvascontext, 'ldata','rdata', false) //
                         }],
-                 //bindEvents: [ClickPlot]
+                 bindEvents: [ClickPlot]
               },
          
         series: {
@@ -189,6 +189,12 @@
           ctx.rect(0,0,500,20);
           ctx.rect(0,594,500,6);
           ctx.fillStyle = 'white';
+          ctx.fill();
+          // Close frame
+          ctx.beginPath();
+          ctx.rect(56,20,435,3);
+          ctx.rect(56,591,435,3);
+          ctx.fillStyle = '#424242';
           ctx.fill(); 
 
         }
