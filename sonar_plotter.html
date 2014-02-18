@@ -20,8 +20,17 @@
 
 	<script type="text/javascript">
 
+      // Test data
+      // Noise source should have a width parameter, so we represent it as a pair of series with different distance in each point. We'll fill this series between in order to achieve a monolithic form view.
+      
+      // helper array to find which series are paired
+      var seriesPairs = [];
+      var pair = ['ldata','rdata'];
+      seriesPairs.push(pair);
+
       var data = [];
       var rdata = [];
+
       var t = new Date();
       for (var i = 0; i <= 100; i++) {
         var y = (t.getTime() + i * 3000);
@@ -40,17 +49,17 @@
         backgroundColor: '#26292B', 
       },
         hooks: { draw: [function(plot, canvascontext) { // Add a hook to fill the space between given series
-                          fillseries(plot, canvascontext, 'ldata','rdata') //
+                          fillseries(plot, canvascontext, 'ldata','rdata', false) //
                         }],
-                // bindEvents: [ClickPlot]
+                 //bindEvents: [ClickPlot]
               },
          
         series: {
           color: '#269246',
           lines: {
             //clickable: true,
-            show: true,
-            lineWidth: 4.2
+            //show: true,
+            //lineWidth: 4.2
           },
           points: { show: false }
         },
@@ -94,27 +103,27 @@
         }
       };
 
-      function fillseries(plot, canvascontext, idl, idr){
+      function fillseries(plot, canvascontext, idl, idr, selected){
         var ctx = canvascontext;
 
-        var s, series, series1;
-        var i = 0;
-        var a = true;
+        var s, series, series1,
+        i = 0,
+        a = true;
         
         // Find series by names
         while (a) {
 
           s = plot.getData()[i];
           if (s == undefined) {
-            console.log('End of plot data');
+            //console.log('End of plot data');
             break;
           } else if (s.id == idl) {
             series = s;
-            console.log(s.id, ' found');
+            //console.log(s.id, ' found');
           }
           else if (s.id == idr) {
             series1 = s;
-            console.log(s.id, ' found');
+            //console.log(s.id, ' found');
             break;
           }
           
@@ -124,11 +133,13 @@
 
         if (series != null && series1 != null) {
 
-          var points = series.datapoints.points;
-          var points1 = series1.datapoints.points;
+          var points = series.datapoints.points,
+              points1 = series1.datapoints.points;
 
-          var xAxis = plot.getAxes().xaxis;
-          var yAxis = plot.getAxes().yaxis;
+          var xAxis = plot.getAxes().xaxis,
+              yAxis = plot.getAxes().yaxis;
+
+          var x,y;
 
           // Start drawing
           ctx.beginPath();
@@ -137,8 +148,8 @@
           for (var i=0; i <= points.length; i++) {
           if (i%2 == 1)
             {
-              var x = points[i-1];
-              var y = points[i];
+              x = points[i-1];
+              y = points[i];
               ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
             }
           }
@@ -146,8 +157,8 @@
           for (var i=points1.length; i >= 0; i--) {
           if (i%2 == 1)
             {
-              var x = points1[i-1];
-              var y = points1[i];
+              x = points1[i-1];
+              y = points1[i];
               ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
             }
           }
@@ -155,15 +166,31 @@
           // Close path by moving to the initial point
           ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
           //ctx.closePath();
+          
+          ctx.fillStyle = "rgba(124,229,82, 0.9)";
 
-          // ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-          ctx.fillStyle = "rgba(124,229,82, 0.9)"
+          // Add stroke to selected series
+          if (selected) {
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = "rgba(99,229,82, 0.2)";
+            ctx.fill();
+            ctx.stroke();
+          }
+          else ctx.fill(); 
+          
           //var grd = ctx.createLinearGradient(0, 50, 0, 320);
           //grd.addColorStop(0, '#8BEE6F');
           //grd.addColorStop(1, "#438537");
           //ctx.stroke();
           //ctx.fillStyle = grd;
-          ctx.fill();
+
+          // Close offset areas of previous fill which appears while graph zooming by white rectangles
+          ctx.beginPath();
+          ctx.rect(0,0,500,20);
+          ctx.rect(0,594,500,6);
+          ctx.fillStyle = 'white';
+          ctx.fill(); 
+
         }
         else console.log('fillseries: not found');
    
@@ -176,7 +203,7 @@
           var yAxis = plot.getAxes().yaxis;
 
           eventHolder.mousedown(function (e) {
-            alert("You pressed the mouse at " + xAxis.p2c(e.pageX) + " " + yAxis.p2c(e.pageY));
+            alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
           });
       }
 
@@ -188,25 +215,40 @@
         ], options).data("plot");
 
 
-      // Plot click event         
+      //Plot click event         
       $("#container").bind("plotclick", function (event, pos, item) {
 
-        var series = plot.getData();
-        var xcnt = series[0].data.length;
+        if (item){
+          var series = item.series.id;
+          //console.log(series.id);
 
-        if (item) {
+          // Find pair of current series
+          for (var i = 0; i <= seriesPairs.length; i++){
+            if (seriesPairs[i][0] == series) {
+              
+              var series1 = seriesPairs[i][1];
 
-          // For each point
-            for (var x = 0 ;x<xcnt;x++) {
-
-              // highlight all of them in the series
-              plot.highlight(1, x);
-              plot.highlight(0, x);
-
+              // Add hook to draw selection
+              plot.getOptions().hooks.draw = [function(plot, canvascontext) { fillseries(plot, canvascontext,series,series1,true)}];
+              
+              // Redraw with selections
+              var pOptions = plot.getOptions();
+              plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
+              break;
             }
+            if (seriesPairs[i][1] == series) {
 
-          //("You clicked point " + item.dataIndex + " in " + item.series.label + ".");
+              var series1 = seriesPairs[i][0]; 
 
+              // Add hook to draw selection
+              plot.getOptions().hooks.draw = [function(plot, canvascontext) { fillseries(plot, canvascontext,series1,series,true)}];
+
+              // Redraw with selections
+              var pOptions = plot.getOptions();
+              plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
+              break;
+            }
+          }
         }
 
       });
