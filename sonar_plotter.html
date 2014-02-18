@@ -36,26 +36,23 @@
 
       var options = {
         grid: {
+        clickable: true,
         backgroundColor: '#26292B', 
       },
         hooks: { draw: [function(plot, canvascontext) { // Add a hook to fill the space between given series
                           fillseries(plot, canvascontext, 'ldata','rdata') //
                         }],
-                 bindEvents: [function (plot, eventHolder) {
-                              eventHolder.mousedown(function (e) {
-                                alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
-                              });
-                            }
-                          ]
+                // bindEvents: [ClickPlot]
               },
          
         series: {
           color: '#269246',
           lines: {
-            show: false,
-            //lineWidth: 1.2
+            //clickable: true,
+            show: true,
+            lineWidth: 4.2
           },
-          //points: { show: true }
+          points: { show: false }
         },
         
         zoom: {
@@ -173,11 +170,47 @@
       }
 
 
-      // make/draw plot
+      // Click hook
+      function ClickPlot(plot, eventHolder) {
+          var xAxis = plot.getAxes().xaxis;
+          var yAxis = plot.getAxes().yaxis;
+
+          eventHolder.mousedown(function (e) {
+            alert("You pressed the mouse at " + xAxis.p2c(e.pageX) + " " + yAxis.p2c(e.pageY));
+          });
+      }
+
+
+      // Make/draw plot
       var plot = $("#container").plot([
         {data: data, id: "ldata", lines:{fill:false}},
         {data: rdata, id: "rdata", lines:{fill:false}},
         ], options).data("plot");
+
+
+      // Plot click event         
+      $("#container").bind("plotclick", function (event, pos, item) {
+
+        var series = plot.getData();
+        var xcnt = series[0].data.length;
+
+        if (item) {
+
+          // For each point
+            for (var x = 0 ;x<xcnt;x++) {
+
+              // highlight all of them in the series
+              plot.highlight(1, x);
+              plot.highlight(0, x);
+
+            }
+
+          //("You clicked point " + item.dataIndex + " in " + item.series.label + ".");
+
+        }
+
+      });
+
 
       window.intervalId = setInterval(function() {
         var n = new Date();  // current time

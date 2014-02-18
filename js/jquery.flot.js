@@ -2796,7 +2796,8 @@ Licensed under the MIT license.
 
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
-            var maxDistance = options.grid.mouseActiveRadius,
+            //var maxDistance = options.grid.mouseActiveRadius,
+            var maxDistance = 20,
                 smallestDistance = maxDistance * maxDistance + 1,
                 item = null, foundPoint = false, i, j, ps;
 
