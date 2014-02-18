@@ -10,6 +10,7 @@
   <script type="text/javascript" src="js/jquery.flot.js"></script>
   <script type="text/javascript" src="js/jquery.flot.time.js"></script>
   <script type="text/javascript" src="js/jquery.flot.navigate.js"></script>
+  <script type="text/javascript" src="js/jquery.flot.fillbetween.js"></script>
   <script type="text/javascript" src="js/FastBlur.js"></script>
 
 </head>
@@ -20,26 +21,41 @@
 	<script type="text/javascript">
 
       var data = [];
+      var rdata = [];
       var t = new Date();
       for (var i = 0; i <= 100; i++) {
-        var y = new Date(t.getTime() + i * 3000);
-
-        data.push([120+Math.random()*100, y]);
+        var y = (t.getTime() + i * 3000);
+        var x = 120+Math.random()*5;
+        rdata.push([x+i*i/200+i/2, y]);
+        data.push([x+20+i*i/200, y]);
       }
 
       // set initial top/bottom of plot
-      var to = data[100][1].getTime()+2000;
-      var bo = data[0][1].getTime()-6000;
+      var to = data[100][1]+2000;
+      var bo = data[0][1]-6000;
 
       var options = {
-  
+        grid: {
+        backgroundColor: '#26292B', 
+      },
+        hooks: { draw: [function(plot, canvascontext) { // Add a hook to fill the space between given series
+                          fillseries(plot, canvascontext, 'ldata','rdata') //
+                        }],
+                 bindEvents: [function (plot, eventHolder) {
+                              eventHolder.mousedown(function (e) {
+                                alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
+                              });
+                            }
+                          ]
+              },
+         
         series: {
           color: '#269246',
           lines: {
-            show: true,
-            lineWidth: 1.2
+            show: false,
+            //lineWidth: 1.2
           },
-          points: { show: true }
+          //points: { show: true }
         },
         
         zoom: {
@@ -81,23 +97,101 @@
         }
       };
 
+      function fillseries(plot, canvascontext, idl, idr){
+        var ctx = canvascontext;
+
+        var s, series, series1;
+        var i = 0;
+        var a = true;
+        
+        // Find series by names
+        while (a) {
+
+          s = plot.getData()[i];
+          if (s == undefined) {
+            console.log('End of plot data');
+            break;
+          } else if (s.id == idl) {
+            series = s;
+            console.log(s.id, ' found');
+          }
+          else if (s.id == idr) {
+            series1 = s;
+            console.log(s.id, ' found');
+            break;
+          }
+          
+          i++;
+
+        }
+
+        if (series != null && series1 != null) {
+
+          var points = series.datapoints.points;
+          var points1 = series1.datapoints.points;
+
+          var xAxis = plot.getAxes().xaxis;
+          var yAxis = plot.getAxes().yaxis;
+
+          // Start drawing
+          ctx.beginPath();
+
+          // First series
+          for (var i=0; i <= points.length; i++) {
+          if (i%2 == 1)
+            {
+              var x = points[i-1];
+              var y = points[i];
+              ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
+            }
+          }
+          // Second series
+          for (var i=points1.length; i >= 0; i--) {
+          if (i%2 == 1)
+            {
+              var x = points1[i-1];
+              var y = points1[i];
+              ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
+            }
+          }
+
+          // Close path by moving to the initial point
+          ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
+          //ctx.closePath();
+
+          // ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+          ctx.fillStyle = "rgba(124,229,82, 0.9)"
+          //var grd = ctx.createLinearGradient(0, 50, 0, 320);
+          //grd.addColorStop(0, '#8BEE6F');
+          //grd.addColorStop(1, "#438537");
+          //ctx.stroke();
+          //ctx.fillStyle = grd;
+          ctx.fill();
+        }
+        else console.log('fillseries: not found');
+   
+      }
+
+
       // make/draw plot
-      var plot = $("#container").plot([data], options).data("plot");
+      var plot = $("#container").plot([
+        {data: data, id: "ldata", lines:{fill:false}},
+        {data: rdata, id: "rdata", lines:{fill:false}},
+        ], options).data("plot");
 
       window.intervalId = setInterval(function() {
         var n = new Date();  // current time
-        var y = new Date(n.getTime() + 100 * 3000); // time of new detections falling from the top
+        var y = n.getTime() + 100 * 3000; // time of new detections falling from the top
 
         // random test x data
-        var x = 120+Math.random()*100;
+        var x = 120+Math.random()*20;
         
         // add new point
         data.push([x, y]);
-
+        rdata.push([x+20, y]);
         // remove last point to keep initial number of points
         data.splice(0, 1);
-
-        //console.log('ydata: ', data[100][1]);
+        rdata.splice(0, 1);
         
         // In order to move plot we need to increase it's borders in options
         plot.getOptions().yaxes[0].max += 3000;
@@ -118,7 +212,7 @@
         pOptions.xaxis.max = axes.xaxis.max;
 
         // draw new cadre, save plot object
-        plot = $.plot($("#container"), [data], pOptions);
+        plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
         
         //$.extend(true, {}, options, {  yaxis: { min: axes.yaxis.min, max: axes.yaxis.max } })
 
