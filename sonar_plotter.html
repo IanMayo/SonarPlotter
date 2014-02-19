@@ -58,8 +58,8 @@
           color: '#269246',
           lines: {
             //clickable: true,
-            //show: true,
-            //lineWidth: 4.2
+            show: true,
+            lineWidth: 0
           },
           points: { show: false }
         },
@@ -167,7 +167,28 @@
           ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
           //ctx.closePath();
           
-          ctx.fillStyle = "rgba(124,229,82, 0.9)";
+          //ctx.fillStyle = "rgba(124,229,82, 0.5)";
+
+          var grd = ctx.createLinearGradient(0, 50, 0, 620);
+          //grd.addColorStop(0, '#8BEE6F');
+          grd.addColorStop(0, 'rgba(124,229,82, 0.1)');
+          //grd.addColorStop(1, "#438537");
+          grd.addColorStop(0.5, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.505, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.515, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.525, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.535, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.545, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.555, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.565, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.575, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.585, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.595, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(0.663, "rgba(124,229,82, 0.9)");
+          grd.addColorStop(1, "rgba(124,229,82, 0.1)");
+
+          //ctx.stroke();
+          ctx.fillStyle = grd;
 
           // Add stroke to selected series
           if (selected) {
@@ -176,13 +197,9 @@
             ctx.fill();
             ctx.stroke();
           }
-          else ctx.fill(); 
-          
-          //var grd = ctx.createLinearGradient(0, 50, 0, 320);
-          //grd.addColorStop(0, '#8BEE6F');
-          //grd.addColorStop(1, "#438537");
-          //ctx.stroke();
-          //ctx.fillStyle = grd;
+          else {
+            ctx.fill(); 
+          }
 
           // Close offset areas of previous fill which appears while graph zooming by white rectangles
           ctx.beginPath();
