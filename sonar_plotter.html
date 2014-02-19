@@ -5,6 +5,11 @@
 			width:500px;
 			height:600px;
 		}
+    #controlpanel {
+      position: absolute;
+      left: 600px;
+      top:40px;
+    }
 	</style>
   <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
   <script type="text/javascript" src="js/jquery.flot.js"></script>
@@ -192,6 +197,7 @@
 
           // Add stroke to selected series
           if (selected) {
+            $('#selectedSeries').html(idl);
             ctx.lineWidth = 10;
             ctx.strokeStyle = "rgba(99,229,82, 0.2)";
             ctx.fill();
@@ -277,7 +283,7 @@
       });
 
 
-      window.intervalId = setInterval(function() {
+      var plotupdater = setInterval(function() {
         var n = new Date();  // current time
         var y = n.getTime() + 100 * 3000; // time of new detections falling from the top
 
@@ -317,6 +323,28 @@
        }, 3000);
 
 
+// Prepare api functions
+
+    function clear() {
+      data = [0,0];
+      $.plot('#container', data, options);
+    }
+
+
+
+// Control panel events
+    $( document ).ready(function() {
+        $('#clearButton').on('click', function() {
+          $('#selectedSeries').html('');
+          clearInterval(plotupdater);
+          clear();
+        });
+    });
+
 	</script>
+  <div id="controlpanel">
+  <div id="clearButton" style="display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Clear data</div>
+  <div id="selectedSeries" style="margin-top:380px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;"></div>
+</div>
 </body>
 </html>
