@@ -24,13 +24,17 @@
 	<div id="container"></div>
 
 	<script type="text/javascript">
+  var plot;
+  var seriesPairs = [];
+  var iii=0;
+
+  function initPlotter(){
 
       // Test data
       // Noise source should have a width parameter, so we represent it as a pair of series with different distance in each point. We'll fill this series between in order to achieve a monolithic form view.
       
-      // helper array to find which series are paired
-      var seriesPairs = [];
-      var pair = ['ldata','rdata'];
+      // helper array to find which series are paired and selected
+      var pair = ['l+data','r+data','data', false];
       seriesPairs.push(pair);
 
       var data = [];
@@ -48,13 +52,18 @@
       var to = data[100][1]+500;
       var bo = data[0][1]-500;
 
+      // set initial options
       var options = {
         grid: {
         clickable: true,
         backgroundColor: '#26292B', 
       },
-        hooks: { draw: [function(plot, canvascontext) { // Add a hook to fill the space between given series
-                          fillseries(plot, canvascontext, 'ldata','rdata', false) //
+        hooks: { draw: [function(plot, canvascontext) {
+
+                        for (var i=0;i<seriesPairs.length;i++) {
+         // Add a hook to fill the space between a given series
+                          fillseries(plot, canvascontext, seriesPairs[i][0],seriesPairs[i][1], seriesPairs[i][3]); //
+                        }
                         }],
                  //bindEvents: [ClickPlot]
               },
@@ -64,7 +73,8 @@
           lines: {
             //clickable: true,
             show: true,
-            lineWidth: 0
+            lineWidth: 0,
+            fill: false
           },
           points: { show: false }
         },
@@ -108,7 +118,14 @@
         }
       };
 
-      function fillseries(plot, canvascontext, idl, idr, selected){
+      // Make/draw plot
+      plot = $("#container").plot([
+        {id: 'l+data', data: data},{id: 'r+data', data:rdata}
+        ], options).data("plot");
+
+    }
+
+    function fillseries(plot, canvascontext, idl, idr, selected){
         var ctx = canvascontext;
 
         var s, series, series1,
@@ -223,80 +240,84 @@
         }
         else console.log('fillseries: not found');
    
-      }
+    }
 
 
-      // Click hook
-      function ClickPlot(plot, eventHolder) {
-          var xAxis = plot.getAxes().xaxis;
-          var yAxis = plot.getAxes().yaxis;
+    //   // Click hook
+    // function ClickPlot(plot, eventHolder) {
+    //       var xAxis = plot.getAxes().xaxis;
+    //       var yAxis = plot.getAxes().yaxis;
 
-          eventHolder.mousedown(function (e) {
-            alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
-          });
-      }
+    //       eventHolder.mousedown(function (e) {
+    //         alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
+    //       });
+    // }
 
-
-      // Make/draw plot
-      var plot = $("#container").plot([
-        {data: data, id: "ldata", lines:{fill:false}},
-        {data: rdata, id: "rdata", lines:{fill:false}},
-        ], options).data("plot");
-
-
-      //Plot click event         
-      $("#container").bind("plotclick", function (event, pos, item) {
-
+    //Plot click event         
+    $("#container").bind("plotclick", function (event, pos, item) {
+        
+        // Remove any selections
+        removeSelections();
+        
+        // If we pointed series
         if (item){
           var series = item.series.id;
-          //console.log(series.id);
 
           // Find pair of current series
-          for (var i = 0; i <= seriesPairs.length; i++){
-            if (seriesPairs[i][0] == series) {
+          for (var i = 0; i < seriesPairs.length; i++){
+            if (seriesPairs[i][0] == series || seriesPairs[i][1] == series) {
               
-              var series1 = seriesPairs[i][1];
-
-              // Add hook to draw selection
-              plot.getOptions().hooks.draw = [function(plot, canvascontext) { fillseries(plot, canvascontext,series,series1,true)}];
+              // Set current series selected status in seriesPairs array.
+              // Before plot will draw it'll iterate over seriesPair.
+              seriesPairs[i][3] = true;
               
               // Redraw with selections
-              var pOptions = plot.getOptions();
-              plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
-              break;
-            }
-            if (seriesPairs[i][1] == series) {
-
-              var series1 = seriesPairs[i][0]; 
-
-              // Add hook to draw selection
-              plot.getOptions().hooks.draw = [function(plot, canvascontext) { fillseries(plot, canvascontext,series1,series,true)}];
-
-              // Redraw with selections
-              var pOptions = plot.getOptions();
-              plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
+              var pData = plot.getData(),
+                  pOptions = plot.getOptions();
+              plot = $.plot($("#container"), pData, pOptions);
               break;
             }
           }
         }
+        else {
+          // Redraw, selections have been already removed earlier
+          var pData = plot.getData(),
+              pOptions = plot.getOptions();
+          plot = $.plot($("#container"), pData, pOptions);
+        }
+    });
 
-      });
+    function removeSelections(){
+      $('#selectedSeries').html('');
+      for (var i = 0; i < seriesPairs.length; i++){
+        seriesPairs[i][3] = false;
+      }
+    }
+    
 
 
-      var plotupdater = setInterval(function() {
+    var plotupdater = setInterval(function() {
         var n = new Date();  // current time
         var y = n.getTime() + 100 * 3000; // time of new detections falling from the top
 
         // random test x data
         var x = 120+Math.random()*20;
-        
-        // add new point
-        data.push([x, y]);
-        rdata.push([x+20, y]);
-        // remove last point to keep initial number of points
-        data.splice(0, 1);
-        rdata.splice(0, 1);
-        
+
+        var plData = plot.getData();
+
+        for (var i=0;i<plData.length;i++) {
+
+        if (plData[i].id == 'l+data') {
+
+            // Update points
+            plData[i].data.push([x, y]); // left series
+            plData[i+1].data.push([x+20, y]); // right series
+
+            plData[i].data.splice(0, 1); // left series
+            plData[i+1].data.splice(0, 1); // right series
+
+          }
+        }
         // In order to move plot we need to increase it's borders in options
         plot.getOptions().yaxes[0].max += 3000;
         plot.getOptions().yaxes[0].min += 3000;
@@ -316,35 +337,192 @@
         pOptions.xaxis.max = axes.xaxis.max;
 
         // draw new cadre, save plot object
-        plot = $.plot($("#container"), [{data: data, id: "ldata"},{data: rdata, id: "rdata"}], pOptions);
+        plot = $.plot($("#container"), plData, pOptions);
         
         //$.extend(true, {}, options, {  yaxis: { min: axes.yaxis.min, max: axes.yaxis.max } })
 
-       }, 3000);
+    }, 3000);
 
 
-// Prepare api functions
+    // Prepare api functions
 
     function clear() {
-      data = [0,0];
-      $.plot('#container', data, options);
+          
+          data = [0,0];
+          
+          var pOptions = plot.getOptions();
+
+          plot = $.plot('#container', data, pOptions);
+
     }
 
+    function addHeading(time, bearing) {
 
+    //
+
+    }
+
+    function addDetection(time, seriesName, bearing, strength){
+
+      // We need to add two series to the graph in order to show the width
+      var lseriesName = 'l+' + seriesName, // Left series id
+          rseriesName = 'r+' + seriesName;  // Right series id
+
+      var k = 1; // Width koeff
+      // Split bearing into 2 points
+      var bearingl = bearing - k*strength,
+          bearingr = bearing + k*strength;
+
+      // Get plot data
+      var plData = plot.getData();
+
+      var notfound = true,
+          timeDelta;
+
+      // Search wether lseriesName exists in current plot data
+      for (var i=0;i<plData.length;i++) {
+
+
+        if (plData[i].id == lseriesName) {
+
+          // Update points
+          plData[i].data.push([bearingl, time]); // left series
+          plData[i+1].data.push([bearingr, time]); // right series
+
+          // !!! Need to add 1st points removal from all series which are outside the display
+
+          // get current axes
+          var axes = plot.getAxes();
+          //console.log('axes: ',axes);
+
+          // In order to move plot we need to increase it's borders in options
+          //var l = plData[i].data.length;
+          timeDelta = time - axes.yaxis.datamax; // time between last point in data and given time
+
+          // Update plot options to move it
+          plot.getOptions().yaxes[0].max += timeDelta;
+          plot.getOptions().yaxes[0].min += timeDelta;
+          plot.setupGrid();
+            
+          // get current options without zoom modifications
+          var plOptions = plot.getOptions();
+
+          // set zoom modifications picked from the state of current axes
+          plOptions.yaxis.max = axes.yaxis.max;
+          plOptions.yaxis.min = axes.yaxis.min;
+          //console.log(pOptions.yaxis.max);
+          plOptions.xaxis.min = axes.xaxis.min;
+          plOptions.xaxis.max = axes.xaxis.max;
+
+          // Save and update plot
+          plot = $.plot('#container', plData, plOptions);
+
+          notfound = false;
+
+          break;
+        } 
+      }
+
+      if (notfound) {
+
+          //console.log('not found');
+          // Prepare array for data
+          var allseries = [];
+
+          // Update seriesPairs
+          seriesPairs.push([lseriesName, rseriesName, seriesName, false]);
+          
+          // Create new data series - lseriesNameData, rseriesNameData
+          var lseriesNameData = [], rseriesNameData = [];
+          
+          lseriesNameData.push([bearingl, time]);
+          rseriesNameData.push([bearingr, time]);
+
+          var i;
+          // Save old data
+          for (i=0;i<plData.length;i++) {
+            allseries.push(plData[i]);
+          }
+
+          // Add new data
+          allseries.push({id: lseriesName, data: lseriesNameData});
+          allseries.push({id: rseriesName, data: rseriesNameData});
+
+          
+          // Update plot
+
+          // get current axes
+          var axes = plot.getAxes();
+
+          // In order to move plot we need to increase it's borders in options
+          if (plData[i-1] != null) {
+
+            //var l = plData[i-1].data.length;
+            //timeDelta = time - plData[i-1].data[l-1][1]; // time between last point in data and given time
+            timeDelta = time - axes.yaxis.datamax; // time between last point in data and given time
+            
+          } else {
+
+            timeDelta = 3000; // If no data before set timeDelta to 3s
+          
+          }
+
+          // Update plot options to move it
+          plot.getOptions().yaxes[0].max += timeDelta;
+          plot.getOptions().yaxes[0].min += timeDelta;
+          plot.setupGrid();
+            
+          // get current options without zoom modifications
+          var plOptions = plot.getOptions();
+
+          // set zoom modifications picked from the state of current axes
+          plOptions.yaxis.max = axes.yaxis.max;
+          plOptions.yaxis.min = axes.yaxis.min;
+          //console.log(pOptions.yaxis.max);
+          plOptions.xaxis.min = axes.xaxis.min;
+          plOptions.xaxis.max = axes.xaxis.max;
+
+          // Save and update plot
+          plot = $.plot('#container', allseries, plOptions);
+         
+      }
+    }
+
+// listener?
 
 // Control panel events
     $( document ).ready(function() {
+
+        initPlotter();
+
         $('#clearButton').on('click', function() {
           $('#selectedSeries').html('');
           clearInterval(plotupdater);
           clear();
         });
+
+        $('#nextButton').on('click', function() {
+          
+        var n = new Date();  // current time
+        var y = n.getTime() + 100 * 3000; // time of new detections falling from the top
+
+        // random test x data
+        var x = 120+Math.random()*20;
+        
+        iii = iii + 1;
+        if (iii > 3) {addDetection(y, 'fghfg', x, 10);} else {addDetection(y, 'gsgs', x, 10);}
+
+        });
     });
 
 	</script>
   <div id="controlpanel">
-  <div id="clearButton" style="display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Clear data</div>
-  <div id="selectedSeries" style="margin-top:380px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;"></div>
+  
+    <div id="clearButton" style="display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Clear data</div>
+
+    <!--<div id="nextButton" style="margin-top:100px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Next</div>-->
+
+    <div id="selectedSeries" style="margin-top:200px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;"></div>
 </div>
 </body>
 </html>

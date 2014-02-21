@@ -2972,9 +2972,10 @@ Licensed under the MIT license.
             var i, hi;
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
-
+                //drawSeriesHighlight(hi.series);
                 if (hi.series.bars.show)
                     drawBarHighlight(hi.series, hi.point);
+                // LLL
                 else
                     drawPointHighlight(hi.series, hi.point);
             }
@@ -2983,7 +2984,8 @@ Licensed under the MIT license.
             executeHooks(hooks.drawOverlay, [octx]);
         }
 
-        function highlight(s, point, auto) {
+        function highlight(s, point, auto, series) {
+  
             if (typeof s == "number")
                 s = series[s];
 
@@ -3056,6 +3058,33 @@ Licensed under the MIT license.
             else
                 series.points.symbol(octx, x, y, radius, false);
             octx.closePath();
+            octx.stroke();
+        }
+
+        // LLL Added draw series function
+        function drawSeriesHighlight(series) {
+
+            var axisx = series.xaxis, axisy = series.yaxis;
+            var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
+
+            octx.lineWidth = 10;
+            octx.strokeStyle = highlightColor;
+
+    		//console.log(series);
+
+            var xx,yy;
+
+            octx.beginPath();
+
+            	for (var i=0; i <= series.datapoints.points.length; i++) {
+          			if (i%2 == 1)
+            			{
+              				xx = series.datapoints.points[i-1];
+              				yy = series.datapoints.points[i];
+              				octx.lineTo(axisx.p2c(xx),axisy.p2c(yy));
+            			}
+          		}
+
             octx.stroke();
         }
 
