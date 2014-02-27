@@ -148,18 +148,7 @@
             grd.addColorStop(0, color);
           } else {
             grd.addColorStop(0, 'rgba(124,229,82, 0.1)'); 
-            //grd.addColorStop(1, "#438537");
             grd.addColorStop(0.5, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.505, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.515, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.525, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.535, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.545, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.555, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.565, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.575, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.585, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.595, "rgba(124,229,82, 0.9)");
             grd.addColorStop(0.663, "rgba(124,229,82, 0.9)");
           }
           if (color != null ) {
