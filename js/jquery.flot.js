@@ -2977,7 +2977,7 @@ Licensed under the MIT license.
                     drawBarHighlight(hi.series, hi.point);
                 // LLL
                 else
-                    drawPointHighlight(hi.series, hi.point);
+                    {}//drawPointHighlight(hi.series, hi.point);
             }
             octx.restore();
 
