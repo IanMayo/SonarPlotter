@@ -196,7 +196,7 @@
 
     //Plot click event         
     $("#container").bind("plotclick", function (event, pos, item) {
-        alert('wefwe');
+
         // Remove any selections
         removeSelections();
         
