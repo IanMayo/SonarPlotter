@@ -279,6 +279,10 @@
       var bearingl = bearing - k*strength,
           bearingr = bearing + k*strength;
 
+      // Time to plotter format
+      var d = new Date("January 1, 1970 " +time);
+      var t = d.getTime(); 
+
       // Get plot data
       var plData = plot.getData();
 
@@ -292,15 +296,15 @@
         if (plData[i].id == lseriesName) {
 
           // Update points
-          plData[i].data.push([bearingl, time]); // left series
-          plData[i+1].data.push([bearingr, time]); // right series
+          plData[i].data.push([bearingl, t]); // left series
+          plData[i+1].data.push([bearingr, t]); // right series
 
           // get current axes
           var axes = plot.getAxes();
 
           // In order to move plot we need to increase it's borders in options
           //var l = plData[i].data.length;
-          timeDelta = time - axes.yaxis.datamax; // time between last point in data and given time
+          timeDelta = t - axes.yaxis.datamax; // time between last point in data and given time
 
           // Update plot options to move it
           plot.getOptions().yaxes[0].max += timeDelta;
@@ -346,8 +350,8 @@
           // Create new data series - lseriesNameData, rseriesNameData
           var lseriesNameData = [], rseriesNameData = [];
           
-          lseriesNameData.push([bearingl, time]);
-          rseriesNameData.push([bearingr, time]);
+          lseriesNameData.push([bearingl, t]);
+          rseriesNameData.push([bearingr, t]);
 
           var i;
 
@@ -369,7 +373,7 @@
           // In order to move plot we need to increase it's borders in options
           if (plData[i-1] != null) {
 
-            timeDelta = time - axes.yaxis.datamax; // time between last point in data and given time
+            timeDelta = t - axes.yaxis.datamax; // time between last point in data and given time
             
           } else {
 
@@ -379,8 +383,8 @@
 
           // Update plot options to move it
           if (seriesName == 'Heading') { // If it's the very first time plot draws any data, we set initial boundaries for ~ 1 hour around Heading.
-            plot.getOptions().yaxes[0].max = time + 5000;
-            plot.getOptions().yaxes[0].min = time - 3600000; // set plot Y-axis boundaries
+            plot.getOptions().yaxes[0].max = t + 5000;
+            plot.getOptions().yaxes[0].min = t - 3600000; // set plot Y-axis boundaries
           } else { // All other new detections goes with delta
             plot.getOptions().yaxes[0].max += timeDelta;
             plot.getOptions().yaxes[0].min += timeDelta;
