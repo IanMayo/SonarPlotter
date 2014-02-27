@@ -251,7 +251,7 @@
     //////////////////
     // api functions
 
-    function clear() {
+    function clearPlotter() {
           
       data = [0,0];
       var pOptions = plot.getOptions();
