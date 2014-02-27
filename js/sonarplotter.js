@@ -140,7 +140,7 @@
           }
 
           // Close path by moving to the initial point
-          ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
+          //ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
 
           var grd = ctx.createLinearGradient(0, 50, 0, 620);
           //grd.addColorStop(0, '#8BEE6F');
