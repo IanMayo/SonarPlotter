@@ -10,6 +10,7 @@
         grid: {
                 clickable: true,
                 backgroundColor: '#26292B', 
+                mouseActiveRadius: 20
               },
 
         hooks: { draw: [function(plot, canvascontext) {
@@ -253,9 +254,9 @@
       plot = $.plot('#container', data, pOptions);
 
     }
-
+    
     function addSelectionListener(seriesName) {
-      
+    
       if (seriesName == null) {
         // selections removed
       } else {

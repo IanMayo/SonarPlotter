@@ -113,7 +113,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         },
         zoom: {
             interactive: false,
-            trigger: "click", // or "click" for single click
+            trigger: "dblclick", // or "click" for single click
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
@@ -123,7 +123,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
     };
 
+
     function init(plot) {
+
+
         function onZoomClick(e, zoomOut) {
             //var w = plot.width(),  h = plot.height(); // LLL
             //var c = { left: w / 2, top: h*2 / 3 }; // LLL should look to ship
@@ -271,12 +274,22 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     {
                                         limit = true; // LLL
                         return;
-                    }            
+                    }  
+                
+                if (plot.getOptions().grid.mouseActiveRadius >= 20) { // LLL set mouse radius on zoom
+                    if (amount>=1) {
+                            plot.getOptions().grid.mouseActiveRadius *= amount*0.8;
+                        } else {
+                            plot.getOptions().grid.mouseActiveRadius *= amount*1.2;
+                        }
+                }
+                else {plot.getOptions().grid.mouseActiveRadius = 20;}
+
                 opts.min = min;
                 opts.max = max;
             }
             });
-            
+
             plot.setupGrid();
             plot.draw();
             
