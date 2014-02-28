@@ -165,6 +165,7 @@
           // Add stroke to selected series
           if (selected) {
             $('#selectedSeries').html(idl.slice(2));
+            addSelectionListener(idl.slice(2));
             ctx.lineWidth = 10;
             ctx.strokeStyle = "rgba(99,229,82, 0.2)";
             ctx.fill();
@@ -195,14 +196,7 @@
         }
   
     }
-    $("#container").bind("plotdblclick", function (event, pos, item) {
-        // zoom out
-        alert('jhgj');
-        plot = $.plot($(container), datas,
-                      $.extend(true, {}, options, {
-                          xaxis: { min: 0, max: 360 }
-                      }));
-    });
+
     //Plot click event         
     $("#container").bind("plotclick", function (event, pos, item) {
 
@@ -243,6 +237,7 @@
 
     function removeSelections(){
       $('#selectedSeries').html('');
+      addSelectionListener();
       for (var i = 0; i < seriesPairs.length; i++){
         seriesPairs[i][3] = false;
       }
@@ -257,6 +252,15 @@
       var pOptions = plot.getOptions();
       plot = $.plot('#container', data, pOptions);
 
+    }
+
+    function addSelectionListener(seriesName) {
+      
+      if (seriesName == null) {
+        // selections removed
+      } else {
+        // seriesName selected
+      }
     }
 
     function addHeading(time, bearing) {
