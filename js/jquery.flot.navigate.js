@@ -113,7 +113,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         },
         zoom: {
             interactive: false,
-            trigger: "dblclick", // or "click" for single click
+            trigger: "click", // or "click" for single click
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
@@ -125,11 +125,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
     function init(plot) {
         function onZoomClick(e, zoomOut) {
-            var w = plot.width(),  h = plot.height(); // LLL
-            var c = { left: w / 2, top: h*2 / 3 }; // LLL should look to ship
-            //var c = plot.offset(); 
-            //c.left = e.pageX - c.left;
-            //c.top = e.pageY - c.top;
+            //var w = plot.width(),  h = plot.height(); // LLL
+            //var c = { left: w / 2, top: h*2 / 3 }; // LLL should look to ship
+            var c = plot.offset(); 
+            c.left = e.pageX - c.left;
+            c.top = e.pageY - c.top;
             if (zoomOut)
                 plot.zoomOut({ center: c });
             else
@@ -231,7 +231,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 };
 
+            var limit = false; // LLL
+
             $.each(plot.getAxes(), function(_, axis) {
+                if (limit == false) { // LLL quick restriction on independent axis zooming
+
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
@@ -240,7 +244,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 if (zr === false) // no zooming on this axis
                     return;
-                    
+
                 min = axis.c2p(min);
                 max = axis.c2p(max);
                 if (min > max) {
@@ -264,10 +268,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (zr &&
                     ((zr[0] != null && range < zr[0]) ||
                      (zr[1] != null && range > zr[1])))
-                    return;
-            
+                    {
+                                        limit = true; // LLL
+                        return;
+                    }            
                 opts.min = min;
                 opts.max = max;
+            }
             });
             
             plot.setupGrid();
@@ -275,6 +282,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotzoom", [ plot, args ]);
+
+            
         };
 
         plot.pan = function (args) {

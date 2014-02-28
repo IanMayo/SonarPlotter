@@ -4,10 +4,6 @@
 
   function initPlotter(){
 
-      // initial top/bottom of plot, will change it when first series added
-      var to = 0,
-          bo = 0;
-
       // set initial options
       var options = {
 
@@ -38,6 +34,12 @@
         },
         
         zoom: {
+          interactive: true,
+
+
+        },
+
+        pan: {
           interactive: true
 
         },
@@ -47,17 +49,17 @@
           max: 360,
           //tickSize: 60,
           position: "top",
-          zoomRange: [100, 360],// need to change to computable values to prevent stretch at zoom end
-          panRange: false
+          zoomRange: [100, 360], // set preferred range here, y-axis zoom will fit it
+          panRange: [0, 360]
         
         },
         
         yaxis: {
-          max: to, // set initial top/bottom values
-          min: bo,
+          max: 0, // set initial top/bottom values, will change it when first series added
+          min: 0,
           mode: "time",
-          zoomRange: [60000,360000],// need to change to computable values to prevent stretch
-          panRange: false,
+          zoomRange: [0,0],
+          panRange: [0,0],
 
           //format labels
           tickFormatter: function (v, axis) {
@@ -193,7 +195,14 @@
         }
   
     }
-
+    $("#container").bind("plotdblclick", function (event, pos, item) {
+        // zoom out
+        alert('jhgj');
+        plot = $.plot($(container), datas,
+                      $.extend(true, {}, options, {
+                          xaxis: { min: 0, max: 360 }
+                      }));
+    });
     //Plot click event         
     $("#container").bind("plotclick", function (event, pos, item) {
 
@@ -229,6 +238,8 @@
           plot = $.plot($("#container"), pData, pOptions);
         }
     });
+
+
 
     function removeSelections(){
       $('#selectedSeries').html('');
@@ -298,6 +309,10 @@
           // Update plot options to move it
           plot.getOptions().yaxes[0].max += timeDelta;
           plot.getOptions().yaxes[0].min += timeDelta;
+          
+          plot.getOptions().yaxes[0].panRange[0] += timeDelta;
+          plot.getOptions().yaxes[0].panRange[1] += timeDelta;
+
           plot.setupGrid();
 
           // Check wether first point of data came out of visible area and remove it
@@ -374,9 +389,17 @@
           if (seriesName == 'Heading') { // If it's the very first time plot draws any data, we set initial boundaries for ~ 1 hour around Heading.
             plot.getOptions().yaxes[0].max = t + 5000;
             plot.getOptions().yaxes[0].min = t - 3600000; // set plot Y-axis boundaries
+
+            plot.getOptions().yaxes[0].panRange = [t - 3600000, t + 5000];
+            plot.getOptions().yaxes[0].zoomRange = [0, 3605000]; // from 0 to (max - min)
+
+
           } else { // All other new detections goes with delta
             plot.getOptions().yaxes[0].max += timeDelta;
             plot.getOptions().yaxes[0].min += timeDelta;
+            plot.getOptions().yaxes[0].panRange[0] += timeDelta;
+            plot.getOptions().yaxes[0].panRange[1] += timeDelta;
+
           } 
           plot.setupGrid();
 
