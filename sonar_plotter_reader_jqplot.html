@@ -1,0 +1,97 @@
+<html>
+<head>
+  <style type="text/css">
+    #container {
+  			width:500px;
+  			height:600px;
+  		}
+    #controlpanel {
+        position: absolute;
+        left: 600px;
+        top:40px;
+      }
+  </style>
+  <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="js/jquery.csv-0.71.min.js"></script>
+  <script type="text/javascript" src="js/jquery.jqplot.js"></script>
+  <script type="text/javascript" language="javascript" src="plugins/jqplot.dateAxisRenderer.js"></script>
+  <link href="css/jquery.jqplot.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+  <div id="container"></div>
+
+  <div id="controlpanel">
+  
+    <div id="clearButton" style="display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Clear data</div>
+
+    <div id="nextButton" style="margin-top:100px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;cursor:pointer">Next</div>
+
+
+    <input type="file" id="csvread" name="files[]" multiple="" style="margin-top:20px;">
+    <br/>Width koeff: <input type="text" id="widthk" value="1" style="margin-top:20px;padding:10px;font-size:22px;width:100px;">
+
+    <div id="selectedSeries" style="margin-top:100px;display:block;width:200px;height:30px;border-radius:5px;background:lightgrey;color:white;font-family:sans-serif;font-size:22px;padding:30 0 30 100;"></div>
+  </div>
+  
+  <script type="text/javascript" src="js/sonarplotter_jqplot.js"></script>
+
+<script type="text/javascript">
+
+  var testdata = [];
+  var iii = 0;
+
+    $( document ).ready(function() {
+
+        initPlotter();
+
+        // Control panel events
+        $('#clearButton').on('click', function() {
+          $('#selectedSeries').html('');
+
+          clearPlotter();
+
+        });
+        
+        $('#nextButton').on('click', function() {
+          
+        widthk = $('#widthk').val();
+
+        iii++;
+        
+        if (iii<157) {
+        
+        addDetection(testdata[iii][0], testdata[0][2], parseFloat(testdata[iii][2]), testdata[iii][7]);
+        addDetection(testdata[iii][0], testdata[0][3], parseFloat(testdata[iii][3]), testdata[iii][7]);
+        addDetection(testdata[iii][0], testdata[0][4], parseFloat(testdata[iii][4]), testdata[iii][7]);
+        addDetection(testdata[iii][0], testdata[0][5], parseFloat(testdata[iii][5]), testdata[iii][7]);
+        addDetection(testdata[iii][0], testdata[0][6], parseFloat(testdata[iii][6]), testdata[iii][7]);
+        addHeading(testdata[iii][0], parseFloat(testdata[iii][1]));
+        } else {
+          alert('end of data')
+        }
+        });
+    });
+
+    function uploadCsv() {
+        var file = document.querySelector('#csvread').files[0];
+        //if (file) {  console.log("Got csv"); }
+        processCsv(file);
+    }
+
+    function processCsv(file) {
+        var reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function(event){
+          var csv = event.target.result;
+          testdata = $.csv.toArrays(csv);
+        }
+        reader.onerror = function(){ alert('Unable to read ' + file.fileName); };
+    }
+
+    document.getElementById('csvread').addEventListener('change', uploadCsv, false);
+
+	</script>
+
+</body>
+</html>
