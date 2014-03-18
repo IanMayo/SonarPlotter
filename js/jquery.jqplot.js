@@ -5881,7 +5881,7 @@
                         this.renderer.shadowRenderer.draw(ctx, gd, opts);
                     }
     
-                    this.renderer.shapeRenderer.draw(ctx, gd, opts);
+                    //this.renderer.shapeRenderer.draw(ctx, gd, opts); LLL
                 }
             }
             // calculate the bounding box

@@ -38,7 +38,7 @@
 
             //bands: { show: true,  interval: '10%'},
             bandData: bdat,
-            //smooth: true,
+            //smooth: true,  Does not work for vertical Graph!
             barDirection: 'horizontal'
 
           },
