@@ -20,8 +20,13 @@
       // set initial options
       var options = {
         sortData: false,
-        seriesDefaults:{
 
+        seriesDefaults:{
+                //lineWidth: 0.5,
+                shadow: false,
+                markerOptions: {
+                  show: false
+                },
                 rendererOptions: {
                     highlightMouseDown: true   
                 },
