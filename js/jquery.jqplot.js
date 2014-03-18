@@ -5971,6 +5971,7 @@
             opts.fill = true;
             opts.closePath = true;
         }
+        opts.closePath = true; // LLL
         s.renderer.shapeRenderer.draw(canvas._ctx, points, opts);
         canvas = null;
     }
@@ -5988,24 +5989,24 @@
     
     
     function handleMove(ev, gridpos, datapos, neighbor, plot) {
-        if (neighbor) {
-            var ins = [neighbor.seriesIndex, neighbor.pointIndex, neighbor.data];
-            var evt1 = jQuery.Event('jqplotDataMouseOver');
-            evt1.pageX = ev.pageX;
-            evt1.pageY = ev.pageY;
-            plot.target.trigger(evt1, ins);
-            if (plot.series[ins[0]].highlightMouseOver && !(ins[0] == plot.plugins.lineRenderer.highlightedSeriesIndex)) {
-                var evt = jQuery.Event('jqplotDataHighlight');
-                evt.which = ev.which;
-                evt.pageX = ev.pageX;
-                evt.pageY = ev.pageY;
-                plot.target.trigger(evt, ins);
-                highlight (plot, neighbor.seriesIndex, neighbor.pointIndex, neighbor.points);
-            }
-        }
-        else if (neighbor == null) {
-            unhighlight (plot);
-        }
+        // if (neighbor) {
+        //     var ins = [neighbor.seriesIndex, neighbor.pointIndex, neighbor.data];
+        //     var evt1 = jQuery.Event('jqplotDataMouseOver');
+        //     evt1.pageX = ev.pageX;
+        //     evt1.pageY = ev.pageY;
+        //     plot.target.trigger(evt1, ins);
+        //     if (plot.series[ins[0]].highlightMouseOver && !(ins[0] == plot.plugins.lineRenderer.highlightedSeriesIndex)) {
+        //         var evt = jQuery.Event('jqplotDataHighlight');
+        //         evt.which = ev.which;
+        //         evt.pageX = ev.pageX;
+        //         evt.pageY = ev.pageY;
+        //         plot.target.trigger(evt, ins);
+        //         //highlight (plot, neighbor.seriesIndex, neighbor.pointIndex, neighbor.points); LLL
+        //     }
+        // }
+        // else if (neighbor == null) {
+        //     //unhighlight (plot); LLL
+        // }
     }
     
     function handleMouseDown(ev, gridpos, datapos, neighbor, plot) {
@@ -6028,7 +6029,7 @@
     function handleMouseUp(ev, gridpos, datapos, neighbor, plot) {
         var idx = plot.plugins.lineRenderer.highlightedSeriesIndex;
         if (idx != null && plot.series[idx].highlightMouseDown) {
-            unhighlight(plot);
+            //unhighlight(plot); LLL
         }
     }
     

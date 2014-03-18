@@ -7,21 +7,30 @@
   var bdat = [];
 
    var t = new Date();
-      for (var i = 0; i <= 100; i++) {
+      for (var i = 0; i <= 30; i++) {
         var y = (t.getTime() + i * 3000);
-        var x = 120+Math.random()*5;
+        var x = 120+Math.random()*15 ;
         data.push([x+20+i*i/200, y]);
         bdat.push([x-50+i*i/200, x+90+i*i/200]);
       }
 
       // set initial top/bottom of plot
-      var to = data[100][1]+500;
-      var bo = data[0][1]-500;
+      var to = data[30][1]+500;
+      var bo = data[0][1]-5000;
       // set initial options
       var options = {
+        sortData: false,
+        seriesDefaults:{
+
+                rendererOptions: {
+                    highlightMouseDown: true   
+                },
+
+            },
         series: [
         {
           rendererOptions: { 
+
             //bands: { show: true,  interval: '10%'},
             bandData: bdat,
             //smooth: true,
