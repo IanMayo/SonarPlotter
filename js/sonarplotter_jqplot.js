@@ -18,7 +18,9 @@
       var to = data[30][1]+500;
       var bo = data[0][1]-5000;
       // set initial options
+
       var options = {
+
         sortData: false,
 
         seriesDefaults:{
@@ -43,15 +45,20 @@
 
           },
         }],
+        cursor:{ 
+          show: true,
+          zoom:true, 
+          showTooltip:false
+        }, 
         axes: {
           xaxis: {
-
+            tickOptions: {formatString: '%d'},
             min: 0,
             max: 360,
-          
           },
           
           yaxis: {
+            tickOptions: {formatString: '%H:%M:%S'},
             renderer:$.jqplot.DateAxisRenderer,
             max: to, // set initial top/bottom values, will change it when first series added
             min: bo,
