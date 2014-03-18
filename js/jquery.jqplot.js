@@ -5117,8 +5117,8 @@
                 var hi = (bd[0][0] > bd[1][0]) ? 0 : 1;
                 var low = (hi) ? 0 : 1;
                 for (var i=0, l=data.length; i < l; i++) {
-                    bands.hiData.push([data[i][0], bd[hi][i]]);
-                    bands.lowData.push([data[i][0], bd[low][i]]);
+                    bands.hiData.push([bd[i][hi], data[i][1]]);
+                    bands.lowData.push([bd[i][low], data[i][1]]);
                 }
             }
 
@@ -5135,8 +5135,8 @@
             var hi = (bd[0][0] > bd[0][1]) ? 0 : 1;
             var low = (hi) ? 0 : 1;
             for (var i=0, l=bd.length; i<l; i++) {
-                bands.hiData.push([data[i][0], bd[i][hi]]);
-                bands.lowData.push([data[i][0], bd[i][low]]);
+                bands.hiData.push([bd[i][hi], data[i][1]]);
+                bands.lowData.push([bd[i][low], data[i][1]]);
             }
         }
 
@@ -5204,18 +5204,18 @@
                 for (var i=0, l = data.length; i < l; i++) {
                     switch (afunc) {
                         case 'add':
-                            bands.hiData.push([data[i][0], data[i][1] + a]);
+                            bands.hiData.push([data[i][0] + a, data[i][1]]);
                             break;
                         case 'multiply':
-                            bands.hiData.push([data[i][0], data[i][1] * a]);
+                            bands.hiData.push([data[i][0] * a, data[i][1]]);
                             break;
                     }
                     switch (bfunc) {
                         case 'add':
-                            bands.lowData.push([data[i][0], data[i][1] + b]);
+                            bands.lowData.push([data[i][0] + b, data[i][1]]);
                             break;
                         case 'multiply':
-                            bands.lowData.push([data[i][0], data[i][1] * b]);
+                            bands.lowData.push([data[i][0] * b, data[i][1]]);
                             break;
                     }
                 }
@@ -5229,13 +5229,13 @@
         var hd = bands.hiData;
         var ld = bands.lowData;
         for (var i = 0, l = hd.length; i<l; i++) {
-            if ((hd[i][1] != null && hd[i][1] > bands._max) || bands._max == null) {
-                bands._max = hd[i][1];
+            if ((hd[i][0] != null && hd[i][0] > bands._max) || bands._max == null) {
+                bands._max = hd[i][0];
             }
         }
         for (var i = 0, l = ld.length; i<l; i++) {
-            if ((ld[i][1] != null && ld[i][1] < bands._min) || bands._min == null) {
-                bands._min = ld[i][1];
+            if ((ld[i][0] != null && ld[i][0] < bands._min) || bands._min == null) {
+                bands._min = ld[i][0];
             }
         }
 

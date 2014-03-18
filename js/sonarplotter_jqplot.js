@@ -4,12 +4,14 @@
 
   function initPlotter(){
   var data = [];
+  var bdat = [];
 
    var t = new Date();
       for (var i = 0; i <= 100; i++) {
         var y = (t.getTime() + i * 3000);
         var x = 120+Math.random()*5;
-        data.push([x, y]);
+        data.push([x+20+i*i/200, y]);
+        bdat.push([x-50+i*i/200, x+90+i*i/200]);
       }
 
       // set initial top/bottom of plot
@@ -17,8 +19,16 @@
       var bo = data[0][1]-500;
       // set initial options
       var options = {
+        series: [
+        {
+          rendererOptions: { 
+            //bands: { show: true,  interval: '10%'},
+            bandData: bdat,
+            //smooth: true,
+            barDirection: 'horizontal'
 
-      
+          },
+        }],
         axes: {
           xaxis: {
 
@@ -36,7 +46,7 @@
       };
 
       // Make/draw blank plot with all prepaired options
-      plot = $.jqplot('container', data, options);
+      plot = $.jqplot('container', [data], options);
 
     }
 
