@@ -7,10 +7,18 @@
       // initial plot options object
 
       var options = {
+        // Heading color
+        seriesColors: ["","rgba(168,5,255,1)"],
+
+        grid: {
+          backgroundColor: '#26292B',
+          gridLineColor: '#424242'
+        },
 
         sortData: false,
 
         seriesDefaults:{
+
           //lineWidth: 0.5,
           shadow: false,
           markerOptions: {
@@ -149,6 +157,9 @@
           var bData = bandsData[i-1];
           // finally pass it to options object
           plot.options.series.push({rendererOptions: {bandData: bData}});
+
+          // Set series color
+          plot.options.seriesColors.push('#269246');
 
           // Update plot
 
