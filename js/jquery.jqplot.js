@@ -6019,9 +6019,12 @@
                 evt.pageY = ev.pageY;
                 plot.target.trigger(evt, ins);
                 highlight (plot, neighbor.seriesIndex, neighbor.pointIndex, neighbor.points);
+                       
+                addSelectionListener(plot.data[ins[0]].label); // LLL
             }
         }
         else if (neighbor == null) {
+            addSelectionListener(null); // LLL
             unhighlight (plot);
         }
     }

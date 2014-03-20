@@ -70,11 +70,14 @@
 
     }
     
+    // This is called when we select a series, seriesName is passed as an argument
     function addSelectionListener(seriesName) {
-    
+      
       if (seriesName == null) {
+        $('#selectedSeries').html('');
         // selections removed
       } else {
+        $('#selectedSeries').html(seriesName);
         // seriesName selected
       }
     }
