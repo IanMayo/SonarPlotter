@@ -1,22 +1,10 @@
   var plot;
   var seriesPairs = [];
+  var bandsData = [];
   var widthk = 1;
 
   function initPlotter(){
-  var data = [];
-  var bdat = [];
 
-   var t = new Date();
-      for (var i = 0; i <= 30; i++) {
-        var y = (t.getTime() + i * 3000);
-        var x = 120+Math.random()*15 ;
-        data.push([x+20+i*i/200, y]);
-        bdat.push([x-50+i*i/200, x+90+i*i/200]);
-      }
-
-      // set initial top/bottom of plot
-      var to = data[30][1]+500;
-      var bo = data[0][1]-5000;
       // set initial options
 
       var options = {
@@ -27,29 +15,31 @@
                 //lineWidth: 0.5,
                 shadow: false,
                 markerOptions: {
-                  show: false
+                  show: true
                 },
                 rendererOptions: {
                     highlightMouseDown: true   
                 },
 
             },
+
         series: [
         {
           rendererOptions: { 
 
             //bands: { show: true,  interval: '10%'},
-            bandData: bdat,
+            //bandData: bdat,
             //smooth: true,  Does not work for vertical Graph!
-            barDirection: 'horizontal'
 
           },
         }],
+
         cursor:{ 
           show: true,
           zoom:true, 
           showTooltip:false
         }, 
+
         axes: {
           xaxis: {
             tickOptions: {formatString: '%d'},
@@ -60,14 +50,13 @@
           yaxis: {
             tickOptions: {formatString: '%H:%M:%S'},
             renderer:$.jqplot.DateAxisRenderer,
-            max: to, // set initial top/bottom values, will change it when first series added
-            min: bo,
           }
         },
       };
 
       // Make/draw blank plot with all prepaired options
-      plot = $.jqplot('container', [data], options);
+      plot = $.jqplot('container',  [[null]], options);
+
 
     }
 
@@ -77,172 +66,14 @@
     // Function below is used in plot options draw hooks. Each time plot draws it iterates over seriesPairs 
     // and uses 'fillseries' to fill series and draw selections
 
-    function fillseries(plot, canvascontext, idl, idr, selected, color){
-        var ctx = canvascontext;
-
-        var s, series, series1,
-        i = 0,
-        a = true;
-        
-        // Find series by names
-        while (a) {
-
-          s = plot.getData()[i];
-          if (s == undefined) {
-            break;
-          } else if (s.id == idl) {
-            series = s;
-          }
-          else if (s.id == idr) {
-            series1 = s;
-            break;
-          }
-          
-          i++;
-
-        }
-
-        if (series != null && series1 != null) {
-
-          var points = series.datapoints.points,
-              points1 = series1.datapoints.points;
-          var xAxis = plot.getAxes().xaxis,
-              yAxis = plot.getAxes().yaxis;
-
-          var x,y;
-
-          // Start drawing
-          ctx.beginPath();
-
-          // First series
-          for (var i=0; i <= points.length; i++) {
-          if (i%2 == 1)
-            {
-              x = points[i-1];
-              y = points[i];
-              ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
-            }
-          }
-          // Second series
-          for (var i=points1.length; i >= 0; i--) {
-          if (i%2 == 1)
-            {
-              x = points1[i-1];
-              y = points1[i];
-              ctx.lineTo(xAxis.p2c(x)+plot.offset().left-8,yAxis.p2c(y)+plot.offset().top-8);
-            }
-          }
-
-          // Close path by moving to the initial point
-          //ctx.lineTo(xAxis.p2c(points[0]+plot.offset().left-8),yAxis.p2c(points[1])+plot.offset().top-8);
-
-          var grd = ctx.createLinearGradient(0, 50, 0, 620);
-          //grd.addColorStop(0, '#8BEE6F');
-          if (color != null ) {
-            grd.addColorStop(0, color);
-          } else {
-            grd.addColorStop(0, 'rgba(124,229,82, 0.1)'); 
-            grd.addColorStop(0.5, "rgba(124,229,82, 0.9)");
-            grd.addColorStop(0.663, "rgba(124,229,82, 0.9)");
-          }
-          if (color != null ) {
-            grd.addColorStop(1, color);
-          } else {
-            grd.addColorStop(1, 'rgba(124,229,82, 0.1)')
-          }
-
-          //ctx.stroke();
-          ctx.fillStyle = grd;
-
-          // Add stroke to selected series
-          if (selected) {
-            $('#selectedSeries').html(idl.slice(2));
-            addSelectionListener(idl.slice(2));
-            ctx.lineWidth = 10;
-            ctx.strokeStyle = "rgba(99,229,82, 0.2)";
-            ctx.fill();
-            ctx.stroke();
-          }
-          else {
-            ctx.fill(); 
-          }
-
-          // Close offset areas of previous fill which appears while graph zooming by white rectangles
-          ctx.beginPath();
-          ctx.rect(0,0,500,20);
-          ctx.rect(0,594,500,6);
-          ctx.rect(0,0,55,594);
-          ctx.rect(490,0,10,594);
-          ctx.fillStyle = 'white';
-          ctx.fill();
-
-          // Close frame
-          ctx.beginPath();
-          ctx.rect(56,20,435,3);
-          ctx.rect(55,20,3,574);
-          ctx.rect(490,20,3,574);
-          ctx.rect(56,591,435,3);
-          ctx.fillStyle = '#424242';
-          ctx.fill(); 
-
-        }
-  
-    }
-
-    //Plot click event         
-    $("#container").bind("plotclick", function (event, pos, item) {
-
-        // Remove any selections
-        removeSelections();
-        
-        // If we pointed series
-        if (item){
-          var series = item.series.id;
-
-          if (series != 'l+Heading' && series != 'r+Heading') {
-            // Find pair of current series
-            for (var i = 0; i < seriesPairs.length; i++){
-              if (seriesPairs[i][0] == series || seriesPairs[i][1] == series) {
-                
-                // Set current series selected status in seriesPairs array.
-                // Before plot will draw it'll iterate over seriesPair.
-                seriesPairs[i][3] = true;
-                
-                // Redraw with selections
-                var pData = plot.getData(),
-                    pOptions = plot.getOptions();
-                plot = $.plot($("#container"), pData, pOptions);
-                break;
-              }
-            }
-          }
-        }
-        else {
-          // Redraw, selections have been already removed earlier
-          var pData = plot.getData(),
-              pOptions = plot.getOptions();
-          plot = $.plot($("#container"), pData, pOptions);
-        }
-    });
-
-
-
-    function removeSelections(){
-      $('#selectedSeries').html('');
-      addSelectionListener();
-      for (var i = 0; i < seriesPairs.length; i++){
-        seriesPairs[i][3] = false;
-      }
-    }
 
     //////////////////
     // api functions
 
     function clearPlotter() {
-          
-      data = [0,0];
-      var pOptions = plot.getOptions();
-      plot = $.plot('#container', data, pOptions);
+
+      var pOptions = plot.options;
+      plot = $.jqplot('container', [[null]], pOptions);
 
     }
     
@@ -266,9 +97,6 @@
       // with different distance in each point. 
       // We'll fill this series between in order to achieve a monolithic form view.
 
-      var lseriesName = 'l+' + seriesName, // Left series id
-          rseriesName = 'r+' + seriesName;  // Right series id
-
       var k = widthk; // Width koeff
 
       // Split bearing into 2 points
@@ -277,57 +105,46 @@
 
       // Time to plotter format
       var d = new Date("January 1, 1970 " +time);
+      //console.log('d: ', d);
       var t = d.getTime(); 
+      //console.log('t: ', t);
 
       // Get plot data
-      var plData = plot.getData();
+      var plData = plot.data;
 
       var notfound = true,
           timeDelta;
 
-      // Search wether lseriesName exists in current plot data
+      // Search wether seriesName exists in current plot data
       for (var i=0;i<plData.length;i++) {
 
-
-        if (plData[i].id == lseriesName) {
+        if (plData[i].label == seriesName) {
 
           // Update points
-          plData[i].data.push([bearingl, t]); // left series
-          plData[i+1].data.push([bearingr, t]); // right series
+          plot.data[i].push([bearing, t]); // 
+
+          bandsData[i-1].push([bearingl, bearingr]);
+          //var bData = bandsData[i-1];
+          console.log(bandsData);
+          //plot.options.series.push({rendererOptions: {bandData: bData}});
 
           // get current axes
-          var axes = plot.getAxes();
+          var axes = plot.axes;
 
           // In order to move plot we need to increase it's borders in options
-          //var l = plData[i].data.length;
-          timeDelta = t - axes.yaxis.datamax; // time between last point in data and given time
+          timeDelta = t - axes.yaxis.max; // time between last point in data and given time
 
           // Update plot options to move it
-          plot.getOptions().yaxes[0].max += timeDelta;
-          plot.getOptions().yaxes[0].min += timeDelta;
-          
-          plot.getOptions().yaxes[0].panRange[0] += timeDelta;
-          plot.getOptions().yaxes[0].panRange[1] += timeDelta;
+          plot.axes.yaxis.max += timeDelta;
+          plot.options.axes.yaxis.max += timeDelta;
+          plot.axes.yaxis.min += timeDelta;
+          plot.options.axes.yaxis.min += timeDelta;
+                
+          var pdd = plot.data;
+          var poo = plot.options;
+          plot.destroy();
 
-          plot.setupGrid();
-
-          // Check wether first point of data came out of visible area and remove it
-          if (plData[i].data[0][1] < plot.getOptions().yaxes[0].min) {
-            plData[i].data.splice(0,1);
-            plData[i+1].data.splice(0,1);
-          }
-                    
-          // get current options without zoom modifications
-          var plOptions = plot.getOptions();
-
-          // set zoom modifications picked from the state of current axes
-          plOptions.yaxis.max = axes.yaxis.max;
-          plOptions.yaxis.min = axes.yaxis.min;
-          plOptions.xaxis.min = axes.xaxis.min;
-          plOptions.xaxis.max = axes.xaxis.max;
-
-          // Save and update plot
-          plot = $.plot('#container', plData, plOptions);
+          plot = $.jqplot('container', pdd, poo);
 
           notfound = false;
 
@@ -337,80 +154,67 @@
 
       if (notfound) {
 
-          // Prepare array for data
-          var allseries = [];
-
-          // Update seriesPairs
-          if (seriesName == 'Heading') {
-          seriesPairs.push([lseriesName, rseriesName, seriesName, false, 'rgba(168,5,255,0.5)']);
-          } else {
-            seriesPairs.push([lseriesName, rseriesName, seriesName, false]);
-          }
-
-          // Create new data series - lseriesNameData, rseriesNameData
-          var lseriesNameData = [], rseriesNameData = [];
-          
-          lseriesNameData.push([bearingl, t]);
-          rseriesNameData.push([bearingr, t]);
-
-          var i;
-
-          // Save old data
-          for (i=0;i<plData.length;i++) {
-            allseries.push(plData[i]);
-          }
+          var bd = [];
+          bd.push([bearingl, bearingr]);
 
           // Add new data
-          allseries.push({id: lseriesName, data: lseriesNameData});
-          allseries.push({id: rseriesName, data: rseriesNameData});
-
+          var newSeries = [];
           
+          newSeries.push([bearing, t]);
+
+          plot.data.push(newSeries);
+
+          // Set new series Label
+          plot.data[i].label = seriesName;
+
+          // Trying to set bandsData
+          var i = plData.length-1;
+
+          bandsData.push(bd);
+
+          var bData = bandsData[i-1];
+          //console.log(bData);
+          plot.options.series.push({rendererOptions: {bandData: bData}});
+
+         
           // Update plot
 
           // get current axes
-          var axes = plot.getAxes();
+          var axes = plot.axes;
 
           // In order to move plot we need to increase it's borders in options
           if (plData[i-1] != null) {
 
-            timeDelta = t - axes.yaxis.datamax; // time between last point in data and given time
+            timeDelta = t - axes.yaxis.max; // time between last point in data and given time
             
           } else {
 
             timeDelta = 3000; // If no data before set timeDelta to 3s
           
           }
-
+          
           // Update plot options to move it
           if (seriesName == 'Heading') { // If it's the very first time plot draws any data, we set initial boundaries for ~ 1 hour around Heading.
-            plot.getOptions().yaxes[0].max = t + 5000;
-            plot.getOptions().yaxes[0].min = t - 3600000; // set plot Y-axis boundaries
-
-            plot.getOptions().yaxes[0].panRange = [t - 3600000, t + 5000];
-            plot.getOptions().yaxes[0].zoomRange = [0, 3605000]; // from 0 to (max - min)
+            plot.axes.yaxis.max = t + 5000;
+            plot.options.axes.yaxis.max = t + 5000;
+            plot.axes.yaxis.min = t - 3600000; // set plot Y-axis boundaries
+            plot.options.axes.yaxis.min = t - 3600000; // set plot Y-axis boundaries
 
 
           } else { // All other new detections goes with delta
-            plot.getOptions().yaxes[0].max += timeDelta;
-            plot.getOptions().yaxes[0].min += timeDelta;
-            plot.getOptions().yaxes[0].panRange[0] += timeDelta;
-            plot.getOptions().yaxes[0].panRange[1] += timeDelta;
+
+            plot.axes.yaxis.max += timeDelta;
+            plot.options.axes.yaxis.max += timeDelta;
+            plot.axes.yaxis.min += timeDelta;
+            plot.options.axes.yaxis.min += timeDelta;
 
           } 
-          plot.setupGrid();
 
-            
-          // get current options without zoom modifications
-          var plOptions = plot.getOptions();
+          var pdd = plot.data;
+          var poo = plot.options;
+          plot.destroy();
 
-          // set zoom modifications picked from the state of current axes
-          plOptions.yaxis.max = axes.yaxis.max;
-          plOptions.yaxis.min = axes.yaxis.min;
-          plOptions.xaxis.min = axes.xaxis.min;
-          plOptions.xaxis.max = axes.xaxis.max;
-
-          // Save and update plot
-          plot = $.plot('#container', allseries, plOptions);
+          plot = $.jqplot('container', pdd, poo);
          
       }
     }

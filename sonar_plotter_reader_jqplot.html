@@ -61,13 +61,13 @@
         iii++;
         
         if (iii<157) {
-        
+        addHeading(testdata[iii][0], parseFloat(testdata[iii][1]));
         addDetection(testdata[iii][0], testdata[0][2], parseFloat(testdata[iii][2]), testdata[iii][7]);
         addDetection(testdata[iii][0], testdata[0][3], parseFloat(testdata[iii][3]), testdata[iii][7]);
         addDetection(testdata[iii][0], testdata[0][4], parseFloat(testdata[iii][4]), testdata[iii][7]);
         addDetection(testdata[iii][0], testdata[0][5], parseFloat(testdata[iii][5]), testdata[iii][7]);
         addDetection(testdata[iii][0], testdata[0][6], parseFloat(testdata[iii][6]), testdata[iii][7]);
-        addHeading(testdata[iii][0], parseFloat(testdata[iii][1]));
+        
         } else {
           alert('end of data')
         }
